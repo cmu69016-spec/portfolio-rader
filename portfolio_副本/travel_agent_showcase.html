@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>旅行 AI Agent · 搭子展示</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600;700&family=Space+Mono:wght@400;700&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1410;
+    --paper: #f5f0e8;
+    --cream: #ede7d9;
+    --sand: #d4c9b0;
+    --terracotta: #c4613a;
+    --terracotta-light: #e8855f;
+    --moss: #4a6741;
+    --sky: #3d6b8e;
+    --gold: #b8932a;
+    --gold-light: #e8c45a;
+    --shadow: rgba(26,20,16,0.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Noto Sans SC', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 48px;
+    background: rgba(245,240,232,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--sand);
+  }
+  .nav-logo {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 15px; font-weight: 600;
+    letter-spacing: .08em; color: var(--terracotta);
+  }
+  .nav-links { display: flex; gap: 36px; }
+  .nav-links a {
+    font-size: 13px; color: var(--ink); text-decoration: none;
+    opacity: .6; letter-spacing: .06em;
+    transition: opacity .2s;
+  }
+  .nav-links a:hover { opacity: 1; }
+
+  /* ─── HERO ─── */
+  .hero {
+    min-height: 100vh;
+    display: grid; place-items: center;
+    text-align: center;
+    padding: 120px 48px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 80%, rgba(196,97,58,.08) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 50% at 80% 20%, rgba(61,107,142,.07) 0%, transparent 70%),
+      radial-gradient(ellipse 100% 80% at 50% 50%, rgba(184,147,42,.04) 0%, transparent 80%);
+  }
+  .hero-label {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px; letter-spacing: .2em;
+    color: var(--terracotta); text-transform: uppercase;
+    border: 1px solid var(--terracotta);
+    padding: 6px 16px; border-radius: 2px;
+    margin-bottom: 32px;
+    animation: fadeUp .8s ease both;
+  }
+  .hero h1 {
+    font-family: 'Noto Serif SC', serif;
+    font-size: clamp(42px, 7vw, 88px);
+    font-weight: 700; line-height: 1.1;
+    letter-spacing: -.02em;
+    animation: fadeUp .8s .1s ease both;
+  }
+  .hero h1 em {
+    font-style: normal; color: var(--terracotta);
+    position: relative;
+  }
+  .hero h1 em::after {
+    content: '';
+    position: absolute; left: 0; bottom: 4px; right: 0;
+    height: 3px;
+    background: var(--terracotta);
+    transform: scaleX(0); transform-origin: left;
+    animation: lineIn 1s .9s ease forwards;
+  }
+  .hero-sub {
+    margin-top: 24px;
+    font-size: 16px; line-height: 1.8; opacity: .65;
+    max-width: 560px; margin-left: auto; margin-right: auto;
+    animation: fadeUp .8s .2s ease both;
+  }
+  .hero-meta {
+    margin-top: 48px; display: flex; gap: 40px; justify-content: center;
+    animation: fadeUp .8s .3s ease both;
+  }
+  .hero-meta-item {
+    text-align: center;
+  }
+  .hero-meta-item .num {
+    font-family: 'Space Mono', monospace;
+    font-size: 28px; font-weight: 700;
+    color: var(--terracotta);
+  }
+  .hero-meta-item .lbl {
+    font-size: 12px; opacity: .5; letter-spacing: .08em; margin-top: 4px;
+  }
+  .scroll-hint {
+    position: absolute; bottom: 36px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    font-size: 11px; letter-spacing: .15em; opacity: .4;
+    font-family: 'Space Mono', monospace;
+    animation: bounce 2s infinite;
+  }
+  .scroll-hint::after {
+    content: '';
+    width: 1px; height: 40px;
+    background: var(--ink);
+  }
+
+  /* ─── SECTIONS ─── */
+  section {
+    padding: 100px 48px;
+    max-width: 1200px; margin: 0 auto;
+  }
+  .section-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px; letter-spacing: .25em; text-transform: uppercase;
+    color: var(--terracotta); opacity: .8;
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-family: 'Noto Serif SC', serif;
+    font-size: clamp(28px, 4vw, 48px);
+    font-weight: 700; line-height: 1.2;
+    letter-spacing: -.01em;
+    margin-bottom: 16px;
+  }
+  .section-sub {
+    font-size: 15px; line-height: 1.8; opacity: .6;
+    max-width: 600px;
+  }
+  .divider {
+    width: 100%; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--sand), transparent);
+    margin: 0 auto;
+  }
+
+  /* ─── SCENE CARD (Section 1) ─── */
+  .scene-grid {
+    margin-top: 64px;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 2px; background: var(--sand);
+    border: 1px solid var(--sand);
+  }
+  .scene-cell {
+    background: var(--paper);
+    padding: 40px;
+  }
+  .scene-cell.accent { background: var(--terracotta); color: white; }
+  .scene-cell.accent .cell-label { color: rgba(255,255,255,.6); }
+  .scene-cell.wide { grid-column: 1 / -1; }
+  .cell-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--terracotta); margin-bottom: 16px;
+  }
+  .scene-cell.accent .cell-label { color: rgba(255,255,255,.7); }
+  .cell-title {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 22px; font-weight: 600; margin-bottom: 12px;
+  }
+  .cell-body { font-size: 14px; line-height: 1.9; opacity: .75; }
+  .scene-cell.accent .cell-body { opacity: .9; }
+
+  .flow-steps {
+    display: flex; flex-direction: column; gap: 0;
+  }
+  .flow-step {
+    display: flex; gap: 20px; align-items: flex-start;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--cream);
+  }
+  .flow-step:last-child { border-bottom: none; }
+  .step-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px; color: var(--terracotta);
+    min-width: 28px; padding-top: 2px;
+  }
+  .step-content .step-name {
+    font-weight: 500; font-size: 15px; margin-bottom: 4px;
+  }
+  .step-content .step-desc {
+    font-size: 13px; opacity: .6; line-height: 1.7;
+  }
+
+  .tool-tags {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px;
+  }
+  .tool-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px; padding: 5px 12px;
+    background: var(--cream); border: 1px solid var(--sand);
+    border-radius: 2px; letter-spacing: .05em;
+  }
+  .tool-tag.active {
+    background: var(--ink); color: var(--paper); border-color: var(--ink);
+  }
+
+  /* ─── CAPABILITY (Section 2) ─── */
+  .cap-grid {
+    margin-top: 64px;
+    display: grid; grid-template-columns: repeat(3,1fr);
+    gap: 1px; background: var(--sand);
+    border: 1px solid var(--sand);
+  }
+  .cap-card {
+    background: var(--paper); padding: 40px 32px;
+    position: relative; overflow: hidden;
+    transition: background .3s;
+    cursor: default;
+  }
+  .cap-card:hover { background: var(--cream); }
+  .cap-card .cap-icon {
+    font-size: 32px; margin-bottom: 20px;
+    display: block;
+  }
+  .cap-card .cap-title {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 18px; font-weight: 600; margin-bottom: 12px;
+  }
+  .cap-card .cap-desc {
+    font-size: 13px; line-height: 1.8; opacity: .65;
+  }
+  .cap-card .cap-value {
+    margin-top: 20px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px; letter-spacing: .12em;
+    color: var(--terracotta);
+    text-transform: uppercase;
+  }
+  .value-bar-wrap {
+    margin-top: 48px; padding: 48px;
+    background: var(--ink); color: var(--paper);
+    display: grid; grid-template-columns: repeat(4,1fr);
+    gap: 32px;
+  }
+  .value-bar-item .vb-label {
+    font-size: 12px; opacity: .5; letter-spacing: .08em;
+    margin-bottom: 16px;
+  }
+  .value-bar-item .vb-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 36px; font-weight: 700;
+    color: var(--gold-light);
+  }
+  .value-bar-item .vb-unit {
+    font-size: 12px; opacity: .5; margin-top: 4px;
+  }
+
+  /* ─── JOURNEY (Section 3) ─── */
+  .journey-wrap {
+    margin-top: 64px; display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 2px; background: var(--sand);
+    border: 1px solid var(--sand);
+    min-height: 600px;
+  }
+  .journey-sidebar {
+    background: var(--ink); color: var(--paper);
+    padding: 0;
+  }
+  .journey-step-btn {
+    display: block; width: 100%;
+    padding: 28px 32px; text-align: left;
+    background: none; border: none; border-bottom: 1px solid rgba(255,255,255,.08);
+    color: var(--paper); cursor: pointer;
+    transition: background .25s;
+    position: relative;
+  }
+  .journey-step-btn:hover { background: rgba(255,255,255,.06); }
+  .journey-step-btn.active {
+    background: var(--terracotta);
+  }
+  .journey-step-btn.active::after {
+    content: '';
+    position: absolute; right: -1px; top: 50%;
+    transform: translateY(-50%);
+    border: 10px solid transparent;
+    border-right: 10px solid var(--paper);
+  }
+  .jsb-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px; letter-spacing: .2em; opacity: .5;
+    margin-bottom: 6px;
+  }
+  .journey-step-btn.active .jsb-num { opacity: .8; }
+  .jsb-title { font-size: 15px; font-weight: 500; }
+  .jsb-sub { font-size: 12px; opacity: .55; margin-top: 4px; }
+
+  .journey-panel {
+    background: var(--paper); padding: 48px;
+    display: none;
+  }
+  .journey-panel.active { display: block; }
+  .panel-stage {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--terracotta); margin-bottom: 16px;
+  }
+  .panel-title {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 26px; font-weight: 600; margin-bottom: 20px;
+  }
+
+  /* Chat mock */
+  .chat-mock {
+    background: var(--cream);
+    border: 1px solid var(--sand);
+    border-radius: 4px;
+    padding: 24px; margin-top: 24px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .chat-bubble {
+    max-width: 80%; padding: 14px 18px;
+    font-size: 14px; line-height: 1.7;
+    border-radius: 2px;
+  }
+  .bubble-user {
+    background: var(--ink); color: var(--paper);
+    align-self: flex-end; text-align: right;
+    border-radius: 2px 2px 0 2px;
+  }
+  .bubble-agent {
+    background: white; color: var(--ink);
+    align-self: flex-start;
+    border: 1px solid var(--sand);
+    border-radius: 2px 2px 2px 0;
+  }
+  .bubble-agent .agent-name {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px; color: var(--terracotta);
+    margin-bottom: 6px; letter-spacing: .1em;
+  }
+  .typing-dots {
+    display: inline-flex; gap: 4px; align-items: center;
+  }
+  .typing-dots span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--sand);
+    animation: typeDot 1.2s infinite;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: .2s; }
+  .typing-dots span:nth-child(3) { animation-delay: .4s; }
+
+  /* Score card in panel */
+  .score-table {
+    margin-top: 24px; width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .score-table th {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+    text-align: left; padding: 10px 16px;
+    background: var(--ink); color: var(--paper);
+    font-weight: 400;
+  }
+  .score-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--cream);
+    vertical-align: middle;
+  }
+  .score-table tr:hover td { background: var(--cream); }
+  .score-bar-cell { width: 120px; }
+  .score-bar {
+    height: 6px; background: var(--cream); border-radius: 1px;
+    overflow: hidden; margin-top: 4px;
+  }
+  .score-bar-fill {
+    height: 100%; background: var(--terracotta);
+    border-radius: 1px;
+    transition: width 1s ease;
+  }
+  .rank-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px; background: var(--terracotta); color: white;
+    padding: 2px 8px; border-radius: 1px;
+  }
+
+  /* Plan cards */
+  .plan-cards {
+    display: grid; grid-template-columns: repeat(3,1fr);
+    gap: 16px; margin-top: 24px;
+  }
+  .plan-card {
+    border: 1px solid var(--sand); padding: 24px;
+    cursor: pointer; transition: all .2s;
+    position: relative;
+  }
+  .plan-card:hover { border-color: var(--terracotta); background: var(--cream); }
+  .plan-card.selected {
+    border-color: var(--terracotta); background: var(--cream);
+  }
+  .plan-card.selected::after {
+    content: '✓'; position: absolute; top: 12px; right: 12px;
+    font-size: 12px; color: var(--terracotta);
+    font-family: 'Space Mono', monospace;
+  }
+  .plan-emoji { font-size: 24px; margin-bottom: 12px; }
+  .plan-name { font-weight: 600; font-size: 15px; margin-bottom: 6px; }
+  .plan-price {
+    font-family: 'Space Mono', monospace;
+    font-size: 18px; color: var(--terracotta); font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .plan-desc { font-size: 12px; opacity: .65; line-height: 1.6; }
+
+  /* Itinerary */
+  .itinerary-day {
+    border-left: 2px solid var(--sand);
+    padding-left: 24px; margin-bottom: 24px;
+    position: relative;
+  }
+  .itinerary-day::before {
+    content: ''; position: absolute; left: -5px; top: 0;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--terracotta);
+  }
+  .day-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px; letter-spacing: .15em; text-transform: uppercase;
+    color: var(--terracotta); margin-bottom: 8px;
+  }
+  .day-title { font-weight: 600; font-size: 16px; margin-bottom: 12px; }
+  .day-events { display: flex; flex-direction: column; gap: 8px; }
+  .day-event {
+    display: flex; gap: 12px; font-size: 13px; align-items: center;
+    padding: 10px 14px;
+    background: var(--cream); border-radius: 2px;
+  }
+  .event-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+  .dot-blue { background: var(--sky); }
+  .dot-orange { background: var(--terracotta); }
+  .dot-green { background: var(--moss); }
+  .event-time { font-family: 'Space Mono', monospace; font-size: 11px; opacity: .5; min-width: 48px; }
+  .event-name { flex: 1; }
+  .event-cost { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--terracotta); }
+
+  /* Apple calendar mock */
+  .cal-mock {
+    background: #1c1c1e; color: white;
+    border-radius: 8px; padding: 20px; margin-top: 24px;
+    font-size: 13px;
+  }
+  .cal-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 16px;
+  }
+  .cal-month { font-size: 17px; font-weight: 600; }
+  .cal-event {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 10px; border-radius: 6px; margin-bottom: 8px;
+  }
+  .cal-event-bar {
+    width: 4px; border-radius: 2px; align-self: stretch; min-height: 40px;
+  }
+  .cal-event-title { font-weight: 500; font-size: 13px; }
+  .cal-event-time { font-size: 11px; opacity: .6; margin-top: 2px; }
+  .bar-blue { background: #0a84ff; }
+  .bar-orange { background: #ff9f0a; }
+  .bar-green { background: #30d158; }
+  .bar-purple { background: #bf5af2; }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    padding: 60px 48px;
+    background: var(--ink); color: var(--paper);
+    text-align: center;
+  }
+  .footer-title {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 24px; margin-bottom: 12px;
+  }
+  .footer-sub { font-size: 13px; opacity: .45; margin-bottom: 32px; }
+  .footer-link {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px; letter-spacing: .1em;
+    padding: 12px 28px;
+    border: 1px solid rgba(255,255,255,.3);
+    color: var(--paper); text-decoration: none;
+    transition: background .2s, border-color .2s;
+  }
+  .footer-link:hover {
+    background: var(--terracotta); border-color: var(--terracotta);
+  }
+  .footer-note {
+    margin-top: 40px; font-size: 11px; opacity: .3;
+    font-family: 'Space Mono', monospace; letter-spacing: .05em;
+  }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes lineIn {
+    to { transform: scaleX(1); }
+  }
+  @keyframes bounce {
+    0%,100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-8px); }
+  }
+  @keyframes typeDot {
+    0%,60%,100% { transform: translateY(0); opacity: .4; }
+    30% { transform: translateY(-4px); opacity: 1; }
+  }
+
+  .fade-in {
+    opacity: 0; transform: translateY(20px);
+    transition: opacity .7s ease, transform .7s ease;
+  }
+  .fade-in.visible { opacity: 1; transform: none; }
+
+  /* URL badge */
+  .url-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--cream); border: 1px solid var(--sand);
+    padding: 10px 18px; border-radius: 2px;
+    font-family: 'Space Mono', monospace; font-size: 12px;
+    margin-top: 32px; color: var(--ink);
+    animation: fadeUp .8s .4s ease both;
+  }
+  .url-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--moss); }
+
+  @media (max-width: 900px) {
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+    section { padding: 72px 24px; }
+    .hero { padding: 100px 24px 60px; }
+    .scene-grid { grid-template-columns: 1fr; }
+    .cap-grid { grid-template-columns: 1fr; }
+    .value-bar-wrap { grid-template-columns: repeat(2,1fr); }
+    .journey-wrap { grid-template-columns: 1fr; }
+    .journey-sidebar { display: flex; overflow-x: auto; }
+    .journey-step-btn { min-width: 180px; }
+    .journey-step-btn.active::after { display: none; }
+    .plan-cards { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <span class="nav-logo">✈ TravelAgent</span>
+  <div class="nav-links">
+    <a href="#scene">场景</a>
+    <a href="#capability">能力</a>
+    <a href="#journey">用户旅程</a>
+    <a href="#access">访问</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div style="position:relative;z-index:1">
+    <div class="hero-label">Dify · Agent · 旅行规划</div>
+    <h1>你的 <em>旅行搭子</em><br>说完即走</h1>
+    <p class="hero-sub">输入一句话需求，AI 自主研究真实攻略、生成个性化方案、写入苹果日历，全程陪你从规划到出发</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><div class="num">3</div><div class="lbl">套方案并行</div></div>
+      <div class="hero-meta-item"><div class="num">5+</div><div class="lbl">平台攻略聚合</div></div>
+      <div class="hero-meta-item"><div class="num">0</div><div class="lbl">行前操心事</div></div>
+    </div>
+    <div class="url-badge">
+      <span class="dot"></span>
+      Agent 已部署 · http://127.0.0.1/chat/OH1E7h7utBKOlKGn
+    </div>
+  </div>
+  <div class="scroll-hint">SCROLL</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- SECTION 1: SCENE -->
+<section id="scene">
+  <div class="fade-in">
+    <div class="section-tag">01 · 场景选择</div>
+    <h2 class="section-title">从「想去成都」<br>到完整行程，全自动</h2>
+    <p class="section-sub">一个真实的五一假期场景：独自出行、预算有限、不想踩坑——正是这个 Agent 最擅长的</p>
+  </div>
+
+  <div class="scene-grid fade-in">
+    <div class="scene-cell accent">
+      <div class="cell-label">场景描述</div>
+      <div class="cell-title">五一成都 3 日独旅</div>
+      <div class="cell-body">
+        用户小林，研究生，第一次去成都，预算 2000 元，不想花大量时间搜攻略，更不想被坑进"网红打卡店"。<br><br>
+        她只说了一句话：<strong>「帮我规划成都 3 天，五一去，预算 2000，不要太商业化的」</strong>
+      </div>
+    </div>
+
+    <div class="scene-cell">
+      <div class="cell-label">发生在哪里</div>
+      <div class="cell-title">手机 / 浏览器对话框</div>
+      <div class="cell-body">
+        全程在 Dify 部署的 Web Chat 界面完成，无需下载 App。规划确认后，行程通过 iOS Shortcuts 一键写入苹果日历，地图导航直接跳转高德/Apple Maps。
+      </div>
+      <div class="tool-tags">
+        <span class="tool-tag active">Dify Agent</span>
+        <span class="tool-tag active">qwen2.5-7b</span>
+        <span class="tool-tag">iOS Shortcuts</span>
+        <span class="tool-tag">Apple 日历</span>
+        <span class="tool-tag">高德地图</span>
+      </div>
+    </div>
+
+    <div class="scene-cell">
+      <div class="cell-label">使用工具</div>
+      <div class="cell-title">4 类核心工具协同</div>
+      <div class="cell-body">
+        网页搜索（攻略爬取）、天气 API（出行适配）、地图 URL Scheme（导航跳转）、Shortcuts 日历写入。所有工具由 Agent 自主调度，用户无感知。
+      </div>
+      <div class="tool-tags">
+        <span class="tool-tag active">🌐 网页搜索</span>
+        <span class="tool-tag active">🌤 天气查询</span>
+        <span class="tool-tag active">🗺 地图导航</span>
+        <span class="tool-tag active">📅 日历写入</span>
+      </div>
+    </div>
+
+    <div class="scene-cell wide">
+      <div class="cell-label">行为流程</div>
+      <div class="flow-steps">
+        <div class="flow-step">
+          <span class="step-num">01</span>
+          <div class="step-content">
+            <div class="step-name">用户输入需求</div>
+            <div class="step-desc">一句话或填写目的地/天数/预算/偏好，Agent 自动补充缺失字段</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <span class="step-num">02</span>
+          <div class="step-content">
+            <div class="step-name">Agent 自主研究攻略</div>
+            <div class="step-desc">调用搜索工具抓取小红书、B站、马蜂窝近3个月高质量内容，提取正面亮点 & 高频避坑词</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <span class="step-num">03</span>
+          <div class="step-content">
+            <div class="step-name">并行生成 3 套方案</div>
+            <div class="step-desc">省钱版 / 舒适版 / 轻奢版同步输出，含费用分解、通勤评估、备选景点</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <span class="step-num">04</span>
+          <div class="step-content">
+            <div class="step-name">用户确认 & 动态修改</div>
+            <div class="step-desc">选择方案后可自然语言微调："第2天改去宽窄巷子" → Agent 只调整该节点，其余保持不变</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <span class="step-num">05</span>
+          <div class="step-content">
+            <div class="step-name">写入日历 & 导航</div>
+            <div class="step-desc">生成 iOS Shortcuts 链接，用户点击后批量写入苹果日历，每个景点含地图坐标、提醒时间、门票说明</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SECTION 2: CAPABILITY -->
+<section id="capability">
+  <div class="fade-in">
+    <div class="section-tag">02 · Agent 能力与价值</div>
+    <h2 class="section-title">不只是"查攻略"<br>是真正的出行搭子</h2>
+    <p class="section-sub">从决策辅助到自动执行，覆盖出行前、途中、结束三个阶段</p>
+  </div>
+
+  <div class="cap-grid fade-in">
+    <div class="cap-card">
+      <span class="cap-icon">🔍</span>
+      <div class="cap-title">攻略研究 & 避坑聚合</div>
+      <div class="cap-desc">自主搜索多平台近3个月真实攻略，提取高频正负面评价，将"237条评论提到宽窄巷子太商业化"这类信号转化为决策建议</div>
+      <div class="cap-value">效率提升 → 节省 3-5 小时搜索时间</div>
+    </div>
+    <div class="cap-card">
+      <span class="cap-icon">🗂</span>
+      <div class="cap-title">3 套方案并行生成</div>
+      <div class="cap-desc">省钱 / 舒适 / 轻奢版同步输出，含每日费用分解、酒店通勤距离评分、备选景点，让用户真正「挑」而不是「将就」</div>
+      <div class="cap-value">决策质量 → 不再因信息不足而后悔</div>
+    </div>
+    <div class="cap-card">
+      <span class="cap-icon">📍</span>
+      <div class="cap-title">通勤距离智能优化</div>
+      <div class="cap-desc">按景点地理坐标自动排列当日参观顺序，最小化通勤时间，并给出步行/地铁/打车方式推荐，避免"一天跑4个方向"</div>
+      <div class="cap-value">体验提升 → 减少无效通勤疲惫感</div>
+    </div>
+    <div class="cap-card">
+      <span class="cap-icon">🌤</span>
+      <div class="cap-title">天气适配 & 动态调整</div>
+      <div class="cap-desc">自动拉取目的地天气预报，对户外景点给出晴雨方案，遇突发关闭时调用备选景点库一键替换</div>
+      <div class="cap-value">风险降低 → 行程不被天气打乱</div>
+    </div>
+    <div class="cap-card">
+      <span class="cap-icon">📅</span>
+      <div class="cap-title">Apple 日历一键写入</div>
+      <div class="cap-desc">行程确认后生成 iOS Shortcuts 链接，批量写入苹果日历。景点=蓝色、餐饮=橙色、交通=绿色，视觉化管理全程安排</div>
+      <div class="cap-value">执行效率 → 0 成本完成行程落地</div>
+    </div>
+    <div class="cap-card">
+      <span class="cap-icon">🔄</span>
+      <div class="cap-title">自然语言动态修改</div>
+      <div class="cap-desc">确认行程后仍可随时对话调整："把第2天下午换成少城公园" → Agent 精准修改该节点，重新计算当日费用和通勤时间</div>
+      <div class="cap-value">持续使用 → 行程变更不再重来一遍</div>
+    </div>
+  </div>
+
+  <div class="value-bar-wrap fade-in">
+    <div class="value-bar-item">
+      <div class="vb-label">攻略搜索时间</div>
+      <div class="vb-num">−80%</div>
+      <div class="vb-unit">从 4h → 不到 30min</div>
+    </div>
+    <div class="value-bar-item">
+      <div class="vb-label">方案对比数量</div>
+      <div class="vb-num">3×</div>
+      <div class="vb-unit">省钱/舒适/轻奢并行</div>
+    </div>
+    <div class="value-bar-item">
+      <div class="vb-label">行程写入操作</div>
+      <div class="vb-num">1 tap</div>
+      <div class="vb-unit">Shortcuts 批量写入日历</div>
+    </div>
+    <div class="value-bar-item">
+      <div class="vb-label">用户持续使用动力</div>
+      <div class="vb-num">↑</div>
+      <div class="vb-unit">每次出行都需要它</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SECTION 3: USER JOURNEY -->
+<section id="journey">
+  <div class="fade-in">
+    <div class="section-tag">03 · 用户旅程</div>
+    <h2 class="section-title">点击每个阶段<br>看真实交互流程</h2>
+    <p class="section-sub">从第一句话到行程写入手机，5 个阶段，全程对话驱动</p>
+  </div>
+
+  <div class="journey-wrap fade-in">
+    <div class="journey-sidebar">
+      <button class="journey-step-btn active" onclick="showPanel(0)">
+        <div class="jsb-num">STEP 01</div>
+        <div class="jsb-title">需求输入</div>
+        <div class="jsb-sub">一句话触发全流程</div>
+      </button>
+      <button class="journey-step-btn" onclick="showPanel(1)">
+        <div class="jsb-num">STEP 02</div>
+        <div class="jsb-title">攻略研究</div>
+        <div class="jsb-sub">AI 自主搜索评分</div>
+      </button>
+      <button class="journey-step-btn" onclick="showPanel(2)">
+        <div class="jsb-num">STEP 03</div>
+        <div class="jsb-title">方案选择</div>
+        <div class="jsb-sub">三版并行，用户决策</div>
+      </button>
+      <button class="journey-step-btn" onclick="showPanel(3)">
+        <div class="jsb-num">STEP 04</div>
+        <div class="jsb-title">行程详情</div>
+        <div class="jsb-sub">每日安排 & 费用</div>
+      </button>
+      <button class="journey-step-btn" onclick="showPanel(4)">
+        <div class="jsb-num">STEP 05</div>
+        <div class="jsb-title">写入日历</div>
+        <div class="jsb-sub">落地到手机</div>
+      </button>
+    </div>
+
+    <!-- Panel 0: Input -->
+    <div class="journey-panel active" id="panel-0">
+      <div class="panel-stage">Step 01 · 需求输入</div>
+      <div class="panel-title">一句话，Agent 开始工作</div>
+      <p style="font-size:14px;opacity:.6;line-height:1.8">用户无需填写复杂表单，自然对话即可触发规划流程。对于缺少的信息，Agent 会主动追问。</p>
+      <div class="chat-mock">
+        <div class="chat-bubble bubble-user">帮我规划成都 3 天，五一去，预算 2000，不要太商业化的</div>
+        <div class="chat-bubble bubble-agent">
+          <div class="agent-name">✈ TRAVEL AGENT</div>
+          好的！收到你的需求了 🗺<br><br>
+          帮你快速确认几点：<br>
+          · 出发城市是哪里？（方便估算交通费）<br>
+          · 几个人一起去？<br>
+          · 偏好风格：深度探索 / 美食优先 / 文化沉浸？（可多选）
+        </div>
+        <div class="chat-bubble bubble-user">上海出发，一个人，美食 + 文化都要</div>
+        <div class="chat-bubble bubble-agent">
+          <div class="agent-name">✈ TRAVEL AGENT</div>
+          完美！正在搜索近期攻略，提取避坑信息……
+          <div style="margin-top:10px"><div class="typing-dots"><span></span><span></span><span></span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel 1: Research -->
+    <div class="journey-panel" id="panel-1">
+      <div class="panel-stage">Step 02 · 攻略研究</div>
+      <div class="panel-title">搜索 → 评分 → 避坑聚合</div>
+      <p style="font-size:14px;opacity:.6;line-height:1.8">Agent 自主调用搜索工具，从小红书/B站/马蜂窝抓取真实攻略，计算质量评分，提炼高频争议点。</p>
+
+      <table class="score-table" style="margin-top:24px">
+        <thead>
+          <tr>
+            <th>排名</th>
+            <th>来源</th>
+            <th>攻略标题</th>
+            <th>综合评分</th>
+            <th>时效</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="rank-badge">#1</span></td>
+            <td>小红书</td>
+            <td>成都3日避坑版真实攻略</td>
+            <td>
+              91
+              <div class="score-bar"><div class="score-bar-fill" style="width:91%"></div></div>
+            </td>
+            <td style="font-family:'Space Mono',monospace;font-size:11px;opacity:.6">2个月前</td>
+          </tr>
+          <tr>
+            <td><span class="rank-badge">#2</span></td>
+            <td>B站</td>
+            <td>成都小众路线vlog 含详细费用</td>
+            <td>
+              87
+              <div class="score-bar"><div class="score-bar-fill" style="width:87%"></div></div>
+            </td>
+            <td style="font-family:'Space Mono',monospace;font-size:11px;opacity:.6">1个月前</td>
+          </tr>
+          <tr>
+            <td><span class="rank-badge">#3</span></td>
+            <td>马蜂窝</td>
+            <td>五一成都美食文化深度游</td>
+            <td>
+              82
+              <div class="score-bar"><div class="score-bar-fill" style="width:82%"></div></div>
+            </td>
+            <td style="font-family:'Space Mono',monospace;font-size:11px;opacity:.6">3个月前</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="margin-top:20px;padding:16px;background:var(--cream);border-left:3px solid var(--terracotta)">
+        <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.15em;color:var(--terracotta);margin-bottom:10px">⚠ 高频避坑信息</div>
+        <div style="font-size:13px;line-height:1.9;opacity:.75">
+          · <strong>宽窄巷子太商业化</strong> — 出现 237 次，建议改为少城公园<br>
+          · <strong>双流打车排队超1小时</strong> — 出现 89 次，建议地铁10号线<br>
+          · <strong>某火锅辣度标注不准</strong> — 出现 52 次，已加入避雷清单
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel 2: Plan Selection -->
+    <div class="journey-panel" id="panel-2">
+      <div class="panel-stage">Step 03 · 方案选择</div>
+      <div class="panel-title">三套方案，点选你喜欢的</div>
+      <p style="font-size:14px;opacity:.6;line-height:1.8">基于攻略研究结果，Agent 并行生成三个版本。点击方案卡片即可选择。</p>
+      <div class="plan-cards">
+        <div class="plan-card" id="plan-save" onclick="selectPlan('save')">
+          <div class="plan-emoji">💰</div>
+          <div class="plan-name">省钱版</div>
+          <div class="plan-price">¥1,380</div>
+          <div class="plan-desc">地铁为主，青旅住宿，免费景点+低价美食，含武侯祠/杜甫草堂/人民公园</div>
+        </div>
+        <div class="plan-card selected" id="plan-mid" onclick="selectPlan('mid')">
+          <div class="plan-emoji">⚖️</div>
+          <div class="plan-name">舒适版 ← 推荐</div>
+          <div class="plan-price">¥1,850</div>
+          <div class="plan-desc">性价比均衡，2星精品住宿，涵盖宽窄替代路线+正宗川菜体验</div>
+        </div>
+        <div class="plan-card" id="plan-lux" onclick="selectPlan('lux')">
+          <div class="plan-emoji">✨</div>
+          <div class="plan-name">轻奢版</div>
+          <div class="plan-price">¥2,600</div>
+          <div class="plan-desc">精品民宿+老字号预约餐厅，专项文化导览，景点私享体验</div>
+        </div>
+      </div>
+      <div style="margin-top:16px;padding:14px;background:var(--cream);font-size:13px;opacity:.7;line-height:1.7">
+        💡 已选「舒适版」。如需调整，直接告诉我：「第2天改成美食优先」或「换掉某个景点」即可。
+      </div>
+    </div>
+
+    <!-- Panel 3: Itinerary -->
+    <div class="journey-panel" id="panel-3">
+      <div class="panel-stage">Step 04 · 行程详情</div>
+      <div class="panel-title">3 天行程一览</div>
+      <p style="font-size:14px;opacity:.6;line-height:1.8;margin-bottom:24px">基于攻略评分与通勤优化生成，每日含费用分解</p>
+
+      <div class="itinerary-day">
+        <div class="day-label">Day 1 · 抵达 & 文化沉浸</div>
+        <div class="day-title">武侯祠 → 锦里 → 玉林路</div>
+        <div class="day-events">
+          <div class="day-event"><div class="event-dot dot-green"></div><div class="event-time">11:30</div><div class="event-name">地铁 10 号线 → 天府广场</div><div class="event-cost">¥4</div></div>
+          <div class="day-event"><div class="event-dot dot-blue"></div><div class="event-time">14:00</div><div class="event-name">武侯祠博物馆（约1.5h）</div><div class="event-cost">¥50</div></div>
+          <div class="day-event"><div class="event-dot dot-blue"></div><div class="event-time">16:00</div><div class="event-name">锦里古街漫步（步行8min）</div><div class="event-cost">免费</div></div>
+          <div class="day-event"><div class="event-dot dot-orange"></div><div class="event-time">18:30</div><div class="event-name">玉林路小酒馆周边觅食</div><div class="event-cost">¥60</div></div>
+        </div>
+        <div style="margin-top:12px;font-family:'Space Mono',monospace;font-size:11px;color:var(--terracotta)">今日预估 ¥210 | ⚠ 武侯祠建议提前网上预约</div>
+      </div>
+
+      <div class="itinerary-day">
+        <div class="day-label">Day 2 · 美食深度</div>
+        <div class="day-title">杜甫草堂 → 少城公园 → 春熙路</div>
+        <div class="day-events">
+          <div class="day-event"><div class="event-dot dot-blue"></div><div class="event-time">09:00</div><div class="event-name">杜甫草堂（约2h）</div><div class="event-cost">¥60</div></div>
+          <div class="day-event"><div class="event-dot dot-blue"></div><div class="event-time">11:30</div><div class="event-name">少城公园喝茶（替代宽窄巷子）</div><div class="event-cost">¥30</div></div>
+          <div class="day-event"><div class="event-dot dot-orange"></div><div class="event-time">19:00</div><div class="event-name">正宗老成都冒菜 / 钟水饺</div><div class="event-cost">¥45</div></div>
+        </div>
+        <div style="margin-top:12px;font-family:'Space Mono',monospace;font-size:11px;color:var(--terracotta)">今日预估 ¥195 | 💡 少城公园是宽窄替代，人少3倍</div>
+      </div>
+    </div>
+
+    <!-- Panel 4: Calendar -->
+    <div class="journey-panel" id="panel-4">
+      <div class="panel-stage">Step 05 · 写入日历</div>
+      <div class="panel-title">一键落地到苹果日历</div>
+      <p style="font-size:14px;opacity:.6;line-height:1.8">Agent 生成 iOS Shortcuts 链接，点击后所有日程批量写入日历，颜色分类、地图坐标、提醒时间全部就位</p>
+
+      <div style="margin-top:24px;padding:16px 20px;background:var(--ink);color:var(--paper);display:inline-block;cursor:pointer;font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.08em" onclick="this.textContent='✓ 已生成 Shortcuts 链接 → 点击导入'">
+        📅 生成「成都3日」Shortcuts 日历包 →
+      </div>
+
+      <div class="cal-mock">
+        <div class="cal-header">
+          <span class="cal-month">🗓 五月 · 旅行日程</span>
+          <span style="font-size:12px;opacity:.5">3 events/day</span>
+        </div>
+        <div class="cal-event" style="background:rgba(10,132,255,.12)">
+          <div class="cal-event-bar bar-blue"></div>
+          <div>
+            <div class="cal-event-title">🏛 武侯祠游览（约1.5h）</div>
+            <div class="cal-event-time">14:00 – 15:30 · 武侯祠博物馆 · ¥50 提前预约</div>
+          </div>
+        </div>
+        <div class="cal-event" style="background:rgba(255,159,10,.1)">
+          <div class="cal-event-bar bar-orange"></div>
+          <div>
+            <div class="cal-event-title">🍜 玉林路觅食</div>
+            <div class="cal-event-time">18:30 – 20:00 · 玉林路 · 人均 ¥60</div>
+          </div>
+        </div>
+        <div class="cal-event" style="background:rgba(48,209,88,.1)">
+          <div class="cal-event-bar bar-green"></div>
+          <div>
+            <div class="cal-event-title">🚇 地铁 10 号线 → 天府广场</div>
+            <div class="cal-event-time">11:30 · 出发提醒 30min 前</div>
+          </div>
+        </div>
+        <div class="cal-event" style="background:rgba(191,90,242,.1)">
+          <div class="cal-event-bar bar-purple"></div>
+          <div>
+            <div class="cal-event-title">🏨 春熙路精品住宿 Check-in</div>
+            <div class="cal-event-time">全天 · ¥288/晚 · 距武侯祠地铁15min</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SECTION 4: ACCESS -->
+<section id="access" style="text-align:center;padding:80px 48px">
+  <div class="fade-in">
+    <div class="section-tag" style="text-align:center">04 · 立即体验</div>
+    <h2 class="section-title">Agent 已上线</h2>
+    <p class="section-sub" style="margin:0 auto">模型：qwen2.5-7b · 平台：Dify · 具备网页搜索 + 天气查询能力</p>
+    <div style="margin-top:48px;padding:32px;background:var(--ink);color:var(--paper);display:inline-block;max-width:580px;width:100%;text-align:left">
+      <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.2em;opacity:.5;margin-bottom:16px">ACCESS URL</div>
+      <div style="font-family:'Space Mono',monospace;font-size:16px;word-break:break-all;color:var(--gold-light)">http://127.0.0.1/chat/<br>OH1E7h7utBKOlKGn</div>
+      <div style="margin-top:24px;font-size:13px;opacity:.6;line-height:1.7">
+        对话入口已开放 · 直接输入目的地 + 天数 + 预算即可启动规划
+      </div>
+    </div>
+    <div style="margin-top:32px;font-size:13px;opacity:.45;line-height:1.8">
+      建议尝试：「帮我规划厦门2天，预算1500，喜欢海边和咖啡馆」
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-title">旅行 AI Agent · 搭子版</div>
+  <div class="footer-sub">基于 Dify 搭建 · qwen2.5-7b 驱动 · Apple 生态深度集成</div>
+  <a href="http://127.0.0.1/chat/OH1E7h7utBKOlKGn" class="footer-link" target="_blank">→ 打开 Agent 对话</a>
+  <div class="footer-note">场景：五一成都3日独旅 · 工具：网页搜索 / 天气查询 / 日历写入 / 地图导航</div>
+</div>
+
+<script>
+  // Journey panel switching
+  function showPanel(idx) {
+    document.querySelectorAll('.journey-panel').forEach((p,i) => {
+      p.classList.toggle('active', i === idx);
+    });
+    document.querySelectorAll('.journey-step-btn').forEach((b,i) => {
+      b.classList.toggle('active', i === idx);
+    });
+  }
+
+  // Plan selection
+  function selectPlan(id) {
+    document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
+    document.getElementById('plan-' + id).classList.add('selected');
+  }
+
+  // Scroll fade-in
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
